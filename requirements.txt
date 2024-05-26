@@ -2,5 +2,5 @@ streamlit
 openai
 langchain
 langchain-openai
-PyMuPDF~>=1.23
+PyMuPDF
 python-docx
