@@ -126,12 +126,12 @@ def main():
                     text_array.append(text_file.read().decode('utf-8'))  # Decode bytes to string
                 st.session_state.text_input = text_array[0]
                 st.session_state.last_uploaded_text_file = text_file
-                st.session_state.processing = False
-                st.session_state.active_tab = None
+                st.session_state.active_tab = "Text File"
 
             if st.session_state.text_input:
                 language = st.text_input("Enter the language to translate to", key="text_file_language")
-                if language and st.button("Process Text File", key="text_file_process_button"):
+
+                if st.button("Process Text File", key="text_file_process_button"):
                     disable_all_tabs()
                     translated_text = generate_response(st.session_state.text_input, language)
                     st.session_state.translated_text = translated_text
@@ -147,12 +147,12 @@ def main():
             manual_text = st.text_area("Enter your text here (up to 2000 characters)", max_chars=2000, height=300, key="manual_text_input")
             if manual_text:
                 st.session_state.manual_text = manual_text
-                st.session_state.processing = False
-                st.session_state.active_tab = None
+                st.session_state.active_tab = "Text Window"
 
             if st.session_state.manual_text:
                 language = st.text_input("Enter the language to translate to", key="manual_text_language")
-                if language and st.button("Process Manual Text", key="manual_text_process_button"):
+
+                if st.button("Process Manual Text", key="manual_text_process_button"):
                     disable_all_tabs()
                     text_chunks = split_text_into_chunks(st.session_state.manual_text)
                     translated_chunks = [generate_response(chunk, language) for chunk in text_chunks]
@@ -170,12 +170,12 @@ def main():
             if word_file and word_file != st.session_state.get("last_uploaded_word_file"):
                 st.session_state.text_input = read_word_file(word_file)
                 st.session_state.last_uploaded_word_file = word_file
-                st.session_state.processing = False
-                st.session_state.active_tab = None
+                st.session_state.active_tab = "MS Word"
 
             if st.session_state.text_input:
                 language = st.text_input("Enter the language to translate to", key="word_file_language")
-                if language and st.button("Process Word File", key="word_file_process_button"):
+
+                if st.button("Process Word File", key="word_file_process_button"):
                     disable_all_tabs()
                     translated_text = generate_response(st.session_state.text_input, language)
                     st.session_state.translated_text = translated_text
