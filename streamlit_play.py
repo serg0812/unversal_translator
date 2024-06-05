@@ -133,8 +133,9 @@ def main():
 
                 if st.button("Process Text File", key="text_file_process_button"):
                     disable_all_tabs()
-                    translated_text = generate_response(st.session_state.text_input, language)
-                    st.session_state.translated_text = translated_text
+                    text_chunks = split_text_into_chunks(st.session_state.text_input)
+                    translated_chunks = [generate_response(chunk, language) for chunk in text_chunks]
+                    st.session_state.translated_text = "\n\n".join(translated_chunks)
                     st.text_area("Processed Output", value=st.session_state.translated_text, height=300)
                     enable_all_tabs()
 
@@ -177,8 +178,9 @@ def main():
 
                 if st.button("Process Word File", key="word_file_process_button"):
                     disable_all_tabs()
-                    translated_text = generate_response(st.session_state.text_input, language)
-                    st.session_state.translated_text = translated_text
+                    text_chunks = split_text_into_chunks(st.session_state.text_input)
+                    translated_chunks = [generate_response(chunk, language) for chunk in text_chunks]
+                    st.session_state.translated_text = "\n\n".join(translated_chunks)
                     st.text_area("Processed Output", value=st.session_state.translated_text, height=300)
                     enable_all_tabs()
 
