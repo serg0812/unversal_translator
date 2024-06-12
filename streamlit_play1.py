@@ -15,7 +15,7 @@ def read_word_file(file):
     return '\n'.join(text)
 
 def main():
-    st.title("File Processed and Translation")
+    st.title("File Processing and Translation")
 
     # Initialize session state
     if "text_input" not in st.session_state:
