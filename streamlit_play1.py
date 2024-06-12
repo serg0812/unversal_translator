@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 from openai import OpenAI
 from gpt4web import generate_response
-from text_processing import split_text_into_chunks  # Import the text processing function
+from text_processing import split_text_into_chunks  # Import the text Processed function
 from pdf_to_image_from_array import convert_pdf_to_images
 from process_images_from_array import *
 from docx import Document
@@ -15,7 +15,7 @@ def read_word_file(file):
     return '\n'.join(text)
 
 def main():
-    st.title("File Processing and Translation")
+    st.title("File Processed and Translation")
 
     # Initialize session state
     if "text_input" not in st.session_state:
@@ -28,18 +28,18 @@ def main():
         st.session_state.image_summary = ""
     if "manual_text" not in st.session_state:
         st.session_state.manual_text = ""
-    if "processing" not in st.session_state:
-        st.session_state.processing = False
+    if "Processed" not in st.session_state:
+        st.session_state.Processed = False
     if "active_tab" not in st.session_state:
         st.session_state.active_tab = None
 
     # Function to disable tabs
     def disable_all_tabs():
-        st.session_state.processing = True
+        st.session_state.Processed = True
 
     # Function to enable all tabs
     def enable_all_tabs():
-        st.session_state.processing = False
+        st.session_state.Processed = False
         st.session_state.active_tab = None
 
     # Create tabs
@@ -49,7 +49,7 @@ def main():
     # PDF Tab
     with tabs[0]:
         st.header("Upload PDF File")
-        if st.session_state.processing and st.session_state.active_tab != "PDF":
+        if st.session_state.Processed and st.session_state.active_tab != "PDF":
             st.info("Processing in progress, please wait...")
         else:
             pdf_file = st.file_uploader("Upload PDF File", type=["pdf"], key="pdf_file_uploader")
@@ -64,17 +64,29 @@ def main():
 
                 if st.button("Process PDF", key="pdf_process_button"):
                     disable_all_tabs()
+                    progress_bar = st.progress(0)
+                    total_pages = len(st.session_state.pdf_images)
+                    translated_texts = []
+
                     if has_table:
                         text_summaries = read_images(st.session_state.pdf_images, text_prompt())
                         table_summaries = read_images(st.session_state.pdf_images, graphs_and_tables_prompt())
-                        translated_texts = [generate_response(text, language) for text in text_summaries]
-                        translated_tables = [generate_response(table, language) for table in table_summaries]
-                        combined_summaries = "\n\n".join([f"Text: {t}\n\nTables: {g}" for t, g in zip(translated_texts, translated_tables)])
+
+                        for i, text in enumerate(text_summaries):
+                            translated_text = generate_response(text, language)
+                            translated_table = generate_response(table_summaries[i], language)
+                            translated_texts.append(f"Text: {translated_text}\n\nTables: {translated_table}")
+                            progress_text=f"Processed page {i+1} out of {total_pages}"
+                            progress_bar.progress((i + 1) / total_pages, progress_text)
                     else:
                         text_summaries = read_images(st.session_state.pdf_images, text_prompt())
-                        translated_texts = [generate_response(text, language) for text in text_summaries]
-                        combined_summaries = "\n\n".join([f"Text: {t}\n\n" for t in translated_texts])
+                        for i, text in enumerate(text_summaries):
+                            translated_text = generate_response(text, language)
+                            translated_texts.append(f"Text: {translated_text}\n\n")
+                            progress_text=f"Processed page {i+1} out of {total_pages}"
+                            progress_bar.progress((i + 1) / total_pages, progress_text)
 
+                    combined_summaries = "\n\n".join(translated_texts)
                     st.session_state.translated_text = combined_summaries
                     st.text_area("Processed Output", value=st.session_state.translated_text, height=300)
                     enable_all_tabs()
@@ -82,7 +94,7 @@ def main():
     # Image Tab
     with tabs[1]:
         st.header("Upload Image File")
-        if st.session_state.processing and st.session_state.active_tab != "Image":
+        if st.session_state.Processed and st.session_state.active_tab != "Image":
             st.info("Processing in progress, please wait...")
         else:
             image_file = st.file_uploader("Upload Image File", type=["jpg", "jpeg", "png"], key="image_file_uploader")
@@ -116,7 +128,7 @@ def main():
     # Text File Tab
     with tabs[2]:
         st.header("Upload Text File")
-        if st.session_state.processing and st.session_state.active_tab != "Text File":
+        if st.session_state.Processed and st.session_state.active_tab != "Text File":
             st.info("Processing in progress, please wait...")
         else:
             text_file = st.file_uploader("Upload Text File", type=["txt"], key="text_file_uploader")
@@ -134,7 +146,15 @@ def main():
                 if st.button("Process Text File", key="text_file_process_button"):
                     disable_all_tabs()
                     text_chunks = split_text_into_chunks(st.session_state.text_input)
-                    translated_chunks = [generate_response(chunk, language) for chunk in text_chunks]
+                    total_chunks = len(text_chunks)
+                    progress_bar = st.progress(0)
+
+                    translated_chunks = []
+                    for i, chunk in enumerate(text_chunks):
+                        translated_chunks.append(generate_response(chunk, language))
+                        progress_text=f"Processed chunk {i+1} out of {total_chunks}"
+                        progress_bar.progress((i + 1) / total_chunks, progress_text)
+
                     st.session_state.translated_text = "\n\n".join(translated_chunks)
                     st.text_area("Processed Output", value=st.session_state.translated_text, height=300)
                     enable_all_tabs()
@@ -142,7 +162,7 @@ def main():
     # Text Window Tab
     with tabs[3]:
         st.header("Enter Text Manually")
-        if st.session_state.processing and st.session_state.active_tab != "Text Window":
+        if st.session_state.Processed and st.session_state.active_tab != "Text Window":
             st.info("Processing in progress, please wait...")
         else:
             manual_text = st.text_area("Enter your text here (up to 2000 characters)", max_chars=2000, height=300, key="manual_text_input")
@@ -156,7 +176,15 @@ def main():
                 if st.button("Process Manual Text", key="manual_text_process_button"):
                     disable_all_tabs()
                     text_chunks = split_text_into_chunks(st.session_state.manual_text)
-                    translated_chunks = [generate_response(chunk, language) for chunk in text_chunks]
+                    total_chunks = len(text_chunks)
+                    progress_bar = st.progress(0)
+
+                    translated_chunks = []
+                    for i, chunk in enumerate(text_chunks):
+                        translated_chunks.append(generate_response(chunk, language))
+                        progress_text=f"Processed chunk {i+1} out of {total_chunks}"
+                        progress_bar.progress((i + 1) / total_chunks, progress_text)
+
                     st.session_state.translated_text = "\n\n".join(translated_chunks)
                     st.text_area("Processed Output", value=st.session_state.translated_text, height=300)
                     enable_all_tabs()
@@ -164,7 +192,7 @@ def main():
     # MS Word Tab
     with tabs[4]:
         st.header("Upload MS Word File")
-        if st.session_state.processing and st.session_state.active_tab != "MS Word":
+        if st.session_state.Processed and st.session_state.active_tab != "MS Word":
             st.info("Processing in progress, please wait...")
         else:
             word_file = st.file_uploader("Upload Word File", type=["docx"], key="word_file_uploader")
@@ -179,7 +207,15 @@ def main():
                 if st.button("Process Word File", key="word_file_process_button"):
                     disable_all_tabs()
                     text_chunks = split_text_into_chunks(st.session_state.text_input)
-                    translated_chunks = [generate_response(chunk, language) for chunk in text_chunks]
+                    total_chunks = len(text_chunks)
+                    progress_bar = st.progress(0)
+
+                    translated_chunks = []
+                    for i, chunk in enumerate(text_chunks):
+                        translated_chunks.append(generate_response(chunk, language))
+                        progress_text=f"Processed chunk {i+1} out of {total_chunks}"
+                        progress_bar.progress((i + 1) / total_chunks, progress_text)
+
                     st.session_state.translated_text = "\n\n".join(translated_chunks)
                     st.text_area("Processed Output", value=st.session_state.translated_text, height=300)
                     enable_all_tabs()
