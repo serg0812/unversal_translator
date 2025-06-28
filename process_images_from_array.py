@@ -13,7 +13,7 @@ def encode_image_file(image_file):
 
 def image_captioning(img_base64,prompt):
     ''' Image summary '''
-    chat = ChatOpenAI(model="gpt-4o",
+    chat = ChatOpenAI(model="gpt-4.1",
                       max_tokens=4000)
 
     msg = chat.invoke(
