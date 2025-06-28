@@ -77,7 +77,7 @@ The drawn piechart should be saved as jpg file, it should contain barchart in th
 Add plt.show() at the end of the script as well.
 The output should contain just python code, dont put there anything like '''python. 
 """
-    chat = ChatOpenAI(model="gpt-4o",
+    chat = ChatOpenAI(model="gpt-4.1",
                         max_tokens=4000
                         )
 
@@ -100,7 +100,7 @@ The drawn barchart should be saved as jpg file, it should contain barchart in th
 Add plt.show() at the end of the script as well.
 The output should contain just python code, dont put there anything like '''python. 
 """
-    chat = ChatOpenAI(model="gpt-4o",
+    chat = ChatOpenAI(model="gpt-4.1",
                         max_tokens=4000
                         )
 
